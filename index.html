@@ -45,7 +45,7 @@ button {
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
 
 <script>
-// ⚠️ SỬA LINK MODEL Ở ĐÂY (đã fix lỗi của bạn)
+// 🔥 LINK MODEL (đã fix)
 const URL = "https://nonamee-star.github.io/ai-pronunciation/my_model/";
 
 // danh sách từ
@@ -53,7 +53,7 @@ const words = ["cat", "dog", "chicken"];
 let currentWordIndex = 0;
 let recognizer;
 
-// đọc mẫu
+// 🔊 đọc mẫu
 function speak() {
     const word = words[currentWordIndex];
     const utterance = new SpeechSynthesisUtterance(word);
@@ -61,7 +61,7 @@ function speak() {
     speechSynthesis.speak(utterance);
 }
 
-// chuyển từ
+// ➡️ chuyển từ
 function nextWord() {
     currentWordIndex = (currentWordIndex + 1) % words.length;
     document.getElementById("word").innerText = words[currentWordIndex];
@@ -81,7 +81,7 @@ async function loadModel() {
     console.log("Model loaded");
 }
 
-// bắt đầu nghe
+// 🎤 bắt đầu nghe
 async function start() {
 
     document.getElementById("result").innerText = "Đang nghe... 🎤";
@@ -93,8 +93,6 @@ async function start() {
     const classLabels = recognizer.wordLabels();
 
     recognizer.listen(result => {
-
-        console.log("Listening...");
 
         const scores = result.scores;
         let maxScore = 0;
@@ -108,9 +106,16 @@ async function start() {
         }
 
         const currentWord = words[currentWordIndex];
+
+        // 🔥 FIX SO SÁNH
+        const cleanPredicted = predictedWord.trim().toLowerCase();
+        const cleanCurrent = currentWord.trim().toLowerCase();
+
+        console.log("AI:", cleanPredicted, "| Word:", cleanCurrent);
+
         let resultText = "";
 
-        if (predictedWord === currentWord) {
+        if (cleanPredicted === cleanCurrent) {
             if (maxScore > 0.85) {
                 resultText = "✅ Đúng (" + maxScore.toFixed(2) + ")";
             } else {
