@@ -1,139 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Luyện phát âm AI</title>
-
-<style>
-body {
-    font-family: Arial;
-    text-align: center;
-    background: #f0f8ff;
-}
-
-h2 {
-    margin-top: 20px;
-}
-
-#word {
-    font-size: 50px;
-    margin: 20px;
-    color: #333;
-}
-
-#result {
-    font-size: 30px;
-    margin: 20px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 18px;
-    margin: 10px;
-    cursor: pointer;
-}
-</style>
+<title>Test AI</title>
 </head>
 
 <body>
 
-<h2>🎤 Luyện phát âm tiếng Anh</h2>
-
-<div id="word">cat</div>
-
-<button onclick="speak()">🔊 Nghe mẫu</button>
-<button onclick="startListening()">🎙️ Bắt đầu nói</button>
-<button onclick="nextWord()">➡️ Từ tiếp theo</button>
-
-<div id="result">Nhấn "Bắt đầu nói" để luyện tập</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+<h1>HELLO TEST</h1>
+<button onclick="test()">Test JS</button>
 
 <script>
 console.log("JS OK");
-const URL = "./my_model/";
 
-const words = ["cat", "dog", "chicken"];
-let currentWordIndex = 0;
-let recognizer;
-
-// đọc mẫu
-function speak() {
-    const word = words[currentWordIndex];
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.lang = "en-US";
-    utterance.rate = 0.9;
-    speechSynthesis.speak(utterance);
-}
-
-// chuyển từ
-function nextWord() {
-    currentWordIndex = (currentWordIndex + 1) % words.length;
-    document.getElementById("word").innerText = words[currentWordIndex];
-    document.getElementById("result").innerText = "Nhấn 'Bắt đầu nói' để luyện tập";
-}
-
-// load model
-async function loadModel() {
-    const checkpointURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
-
-    recognizer = speechCommands.create(
-        "BROWSER_FFT",
-        undefined,
-        checkpointURL,
-        metadataURL
-    );
-
-    await recognizer.ensureModelLoaded();
-    console.log("Model loaded");
-}
-
-// bắt đầu nghe
-async function startListening() {
-
-    document.getElementById("result").innerText = "Đang nghe... 🎤";
-
-    if (!recognizer) {
-        await loadModel();
-    }
-
-    const classLabels = recognizer.wordLabels();
-
-    recognizer.listen(result => {
-
-        const scores = result.scores;
-        const currentWord = words[currentWordIndex];
-
-        let maxScore = 0;
-        let predictedWord = "";
-
-        for (let i = 0; i < classLabels.length; i++) {
-            if (scores[i] > maxScore) {
-                maxScore = scores[i];
-                predictedWord = classLabels[i];
-            }
-        }
-
-        let resultText = "";
-
-        if (predictedWord === currentWord) {
-            if (maxScore > 0.85) {
-                resultText = "✅ Đúng (" + maxScore.toFixed(2) + ")";
-            } else {
-                resultText = "⚠️ Gần đúng (" + maxScore.toFixed(2) + ")";
-            }
-        } else {
-            resultText = "❌ Sai (AI nghe: " + predictedWord + ")";
-        }
-
-        document.getElementById("result").innerText = resultText;
-
-    }, {
-        probabilityThreshold: 0.75,
-        overlapFactor: 0.5
-    });
+function test() {
+    alert("JS chạy OK!");
 }
 </script>
 
