@@ -3,77 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <title>Luyện phát âm AI</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f0f8ff;
+}
+
+#word {
+    font-size: 50px;
+    margin: 20px;
+}
+
+#result {
+    font-size: 28px;
+    margin: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+}
+</style>
 </head>
 
-<body style="text-align:center; font-family: Arial;">
+<body>
 
-<h1>🎤 Luyện phát âm</h1>
+<h2>🎤 Luyện phát âm</h2>
 
-<h2 id="word">cat</h2>
+<div id="word">cat</div>
 
-<button onclick="start()">🎙️ Start</button>
+<button onclick="speak()">🔊 Nghe mẫu</button>
+<button onclick="start()">🎙️ Bắt đầu nói</button>
+<button onclick="nextWord()">➡️ Từ tiếp theo</button>
 
-<p id="result">Bấm Start để bắt đầu</p>
+<div id="result">Nhấn "Bắt đầu nói"</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
 
 <script>
-console.log("JS OK");
+// ⚠️ SỬA LINK MODEL Ở ĐÂY (đã fix lỗi của bạn)
+const URL = "https://nonamee-star.github.io/ai-pronunciation/my_model/";
 
-const URL = "./my_model/";
-
+// danh sách từ
 const words = ["cat", "dog", "chicken"];
 let currentWordIndex = 0;
 let recognizer;
 
+// đọc mẫu
+function speak() {
+    const word = words[currentWordIndex];
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = "en-US";
+    speechSynthesis.speak(utterance);
+}
+
+// chuyển từ
+function nextWord() {
+    currentWordIndex = (currentWordIndex + 1) % words.length;
+    document.getElementById("word").innerText = words[currentWordIndex];
+    document.getElementById("result").innerText = "Nhấn 'Bắt đầu nói'";
+}
+
+// load model
+async function loadModel() {
+    recognizer = speechCommands.create(
+        "BROWSER_FFT",
+        undefined,
+        URL + "model.json",
+        URL + "metadata.json"
+    );
+
+    await recognizer.ensureModelLoaded();
+    console.log("Model loaded");
+}
+
+// bắt đầu nghe
 async function start() {
-    console.log("Start clicked");
+
+    document.getElementById("result").innerText = "Đang nghe... 🎤";
 
     if (!recognizer) {
-        recognizer = speechCommands.create(
-            "BROWSER_FFT",
-            undefined,
-            URL + "model.json",
-            URL + "metadata.json"
-        );
-
-        await recognizer.ensureModelLoaded();
-        console.log("Model loaded");
+        await loadModel();
     }
 
     const classLabels = recognizer.wordLabels();
-
-    document.getElementById("result").innerText = "Đang nghe...";
 
     recognizer.listen(result => {
 
         console.log("Listening...");
 
-        let scores = result.scores;
+        const scores = result.scores;
         let maxScore = 0;
-        let predicted = "";
+        let predictedWord = "";
 
         for (let i = 0; i < classLabels.length; i++) {
             if (scores[i] > maxScore) {
                 maxScore = scores[i];
-                predicted = classLabels[i];
+                predictedWord = classLabels[i];
             }
         }
 
-        let currentWord = words[currentWordIndex];
-        let text = "";
+        const currentWord = words[currentWordIndex];
+        let resultText = "";
 
-        if (predicted === currentWord) {
-            text = "✅ Đúng (" + maxScore.toFixed(2) + ")";
+        if (predictedWord === currentWord) {
+            if (maxScore > 0.85) {
+                resultText = "✅ Đúng (" + maxScore.toFixed(2) + ")";
+            } else {
+                resultText = "⚠️ Gần đúng (" + maxScore.toFixed(2) + ")";
+            }
         } else {
-            text = "❌ Sai: " + predicted;
+            resultText = "❌ Sai (AI nghe: " + predictedWord + ")";
         }
 
-        document.getElementById("result").innerText = text;
+        document.getElementById("result").innerText = resultText;
 
     }, {
-        probabilityThreshold: 0.75
+        probabilityThreshold: 0.75,
+        overlapFactor: 0.5
     });
 }
 </script>
